@@ -52,4 +52,6 @@ Trigger DAG ปกติ รอ published แล้วตรวจ Pipeline stat
 
 ## ขอบเขตที่ยังไม่ได้ทดสอบ
 
-ยังไม่ได้ทดสอบการดึงข้อมูล Spoonacular ด้วย key จริงหรือโควตาจริง ยังไม่ได้ตรวจว่าบัญชี GitHub ของผู้ใช้ตั้ง repo เป็น public และยังไม่ได้ส่ง Classroom ไม่มีการรับรองคะแนนหรือเวลา commit เทียบกำหนดสอบ
+ยังไม่ได้ทดสอบการดึงข้อมูล Spoonacular ด้วย key จริงหรือโควตาจริง และยังไม่ได้ส่ง Classroom ไม่มีการรับรองคะแนนหรือเวลา commit เทียบกำหนดสอบ
+
+อัปโหลดโค้ดและ PDF ไปยัง branch main ของ repo ที่ผู้ใช้ให้แล้ว ตรวจ GitHub API แบบไม่ใช้ token ได้ `private: false` และตรวจ remote commit ตรงกับ local ก่อนส่งมอบ
