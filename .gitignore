@@ -1,0 +1,13 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+data/
+logs/
+work/
+*.pyc
+*.zip
+evidence/private/
+/AGENTS.md
+/HANDOFF.md
+/CURRENT_STATUS.md

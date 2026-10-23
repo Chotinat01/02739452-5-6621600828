@@ -1,0 +1,109 @@
+name: recipe-exam
+x-airflow: &airflow
+  build:
+    context: .
+    dockerfile: Dockerfile.airflow
+  image: recipe-exam-airflow:2.10.4
+  env_file: .env
+  environment: &airflow-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${PIPELINE_DATABASE_URL}
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session
+    AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Bangkok
+    PYTHONPATH: /opt/airflow/project
+    RECIPE_DATA_DIR: /opt/airflow/data
+  volumes:
+    - ./dags:/opt/airflow/dags:ro
+    - ./pipeline:/opt/airflow/project/pipeline:ro
+    - ./tests:/opt/airflow/project/tests:ro
+    - ./scripts:/opt/airflow/project/scripts:ro
+    - ./evidence:/opt/airflow/project/evidence
+    - recipe-data:/opt/airflow/data
+    - airflow-logs:/opt/airflow/logs
+  depends_on:
+    postgres:
+      condition: service_healthy
+services:
+  volume-init:
+    image: busybox:latest
+    user: '0:0'
+    command: ['sh', '-c', 'chown -R 50000:0 /data /logs']
+    volumes:
+      - recipe-data:/data
+      - airflow-logs:/logs
+  postgres:
+    image: postgres:16-alpine
+    env_file: .env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  airflow-init:
+    <<: *airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+      volume-init:
+        condition: service_completed_successfully
+    command:
+      - bash
+      - -ec
+      - |
+        airflow db migrate
+        python /opt/airflow/project/scripts/init_database.py
+        airflow users create --username "$${AIRFLOW_ADMIN_USER}" --password "$${AIRFLOW_ADMIN_PASSWORD}" --firstname Student --lastname Exam --role Admin --email student@example.invalid || airflow users reset-password --username "$${AIRFLOW_ADMIN_USER}" --password "$${AIRFLOW_ADMIN_PASSWORD}"
+  airflow-webserver:
+    <<: *airflow
+    command: webserver
+    ports:
+      - '127.0.0.1:${AIRFLOW_PORT:-8080}:8080'
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, curl, --fail, http://localhost:8080/health]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+    restart: unless-stopped
+  airflow-scheduler:
+    <<: *airflow
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD-SHELL, 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    environment:
+      DASHBOARD_DATABASE_URL: ${DASHBOARD_DATABASE_URL}
+    ports:
+      - '127.0.0.1:${DASHBOARD_PORT:-8501}:8501'
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+volumes:
+  postgres-data:
+  recipe-data:
+  airflow-logs:

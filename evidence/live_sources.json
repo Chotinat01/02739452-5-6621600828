@@ -1,0 +1,20 @@
+{
+  "mealdb": {
+    "valid": 100,
+    "unique": 100,
+    "rejected": 0,
+    "warnings": 0,
+    "checked_at": "2026-10-23T06:46:07.661646+00:00"
+  },
+  "wikibooks": {
+    "valid": 180,
+    "unique": 180,
+    "rejected": 0,
+    "warnings": 8,
+    "checked_at": "2026-10-23T06:49:42.143249+00:00"
+  },
+  "spoonacular": {
+    "error": "missing_api_key: set SPOONACULAR_API_KEY in .env",
+    "checked_at": "2026-10-23T06:49:42.150765+00:00"
+  }
+}
