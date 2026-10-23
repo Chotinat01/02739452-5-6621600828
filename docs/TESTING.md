@@ -52,4 +52,6 @@ scripts/verify_runs.py ตรวจ baseline สามแหล่ง รัน�
 
 ## สิ่งที่ผู้ใช้ต้องทำในการส่ง
 
+ตรวจซ้ำตามหมายเหตุข้อสอบโดย clone GitHub ใหม่ที่ commit d0b19e6176ff5972d5fd2c4897070316e682f3f1 สร้าง .env ใหม่และฐานข้อมูล/data volume ใหม่ เริ่ม canonical 0 สูตร แล้วรัน clean_clone_audit ผ่าน scheduler ได้ 290 สูตรครบสามแหล่ง cached_pages=0 ทุกแหล่ง เวลาของ extract ทั้งสามช่วงซ้อนกันจริง reader ไม่มีสิทธิ์ INSERT/UPDATE/DELETE เว็บ healthy tests 8 ข้อและ AppTest ผ่าน ดู evidence/clean_clone_audit.json การ build ใช้ Docker image cache ในเครื่อง แต่ไม่ได้ใช้ข้อมูล/cache ต้นทางเดิม
+
 Repo ถูกตั้ง public และอัปโหลด branch main แล้ว ผู้ใช้ต้องแก้แหล่งที่สามในโพสต์จองและส่ง repo กับ PDF ทาง Classroom เอง ยังไม่มีการส่ง Classroom แทน และไม่รับรองคะแนนหรือกำหนดสอบจริง

@@ -1,0 +1,27 @@
+{
+  "checked_at_utc": "2026-10-23T07:57:05.077386+00:00",
+  "audited_commit": "d0b19e6176ff5972d5fd2c4897070316e682f3f1",
+  "commit_time": "2026-10-23T14:44:56+07:00",
+  "checks": {
+    "required:dags/recipe_pipeline.py": true,
+    "required:web/app.py": true,
+    "required:docker-compose.yml": true,
+    "required:requirements.txt": true,
+    "required:README.md": true,
+    "required:.env.example": true,
+    "required:output/pdf/5_6621600828_summary.pdf": true,
+    "no_dotenv_committed_in_history": true,
+    "current_local_credentials_absent_from_all_git_blobs": true,
+    "pdf_at_most_3_pages": true,
+    "pdf_has_repo_url": true,
+    "pdf_graph_grid_and_dashboard_images": true,
+    "pdf_graph_and_grid_labels": true,
+    "pdf_two_real_problems": true,
+    "no_selenium_dependency": true,
+    "scheduled_three_source_verification_passed": true,
+    "restored_all_three_sources": true
+  },
+  "git_blobs_checked": 65,
+  "pdf_pages": 3,
+  "all_static_checks_passed": true
+}

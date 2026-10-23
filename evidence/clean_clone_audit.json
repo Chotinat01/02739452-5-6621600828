@@ -1,0 +1,56 @@
+{
+  "checked_at_utc": "2026-10-23T07:55:16.350457+00:00",
+  "audited_commit": "d0b19e6176ff5972d5fd2c4897070316e682f3f1",
+  "run_id": "clean_clone_audit",
+  "project": "recipe-exam-audit",
+  "database_and_data_volumes_created_fresh": true,
+  "docker_image_build_cache_reused": true,
+  "dashboard_count": 290,
+  "sources": [
+    {
+      "source": "forkify",
+      "status": "ok",
+      "valid_count": 10,
+      "cached_pages": 0
+    },
+    {
+      "source": "mealdb",
+      "status": "ok",
+      "valid_count": 100,
+      "cached_pages": 0
+    },
+    {
+      "source": "wikibooks",
+      "status": "partial",
+      "valid_count": 180,
+      "cached_pages": 0
+    }
+  ],
+  "extract_task_intervals": [
+    {
+      "task_id": "mealdb.extract",
+      "start": "2026-10-23 07:50:06.642147+00:00",
+      "end": "2026-10-23 07:50:09.447160+00:00"
+    },
+    {
+      "task_id": "forkify.extract",
+      "start": "2026-10-23 07:50:06.641610+00:00",
+      "end": "2026-10-23 07:50:18.083471+00:00"
+    },
+    {
+      "task_id": "wikibooks.extract",
+      "start": "2026-10-23 07:50:06.626713+00:00",
+      "end": "2026-10-23 07:53:34.393515+00:00"
+    }
+  ],
+  "checks": {
+    "scheduled_dag_success": true,
+    "all_three_sources_usable": true,
+    "at_least_100_recipes": true,
+    "all_sources_used_cold_cache": true,
+    "extract_tasks_overlap_in_time": true,
+    "dashboard_role_cannot_write": true,
+    "dashboard_http_healthy": true
+  },
+  "passed": true
+}
