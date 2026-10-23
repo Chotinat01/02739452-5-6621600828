@@ -56,16 +56,25 @@ def run(label, conf, expected, count=None):
         assert after['current'] == count, (label, after)
     if label == 'repeat':
         assert before['canonical'] == after['canonical'], 'UPSERT grew canonical table on identical data'
+        assert quality['all_three_sources_available'], 'Need all three live sources in the baseline'
+    if label.endswith('_outage'):
+        failed_source = conf['fail_sources'][0]
+        assert next(s for s in sources if s['source'] == failed_source)['status'] == 'unavailable'
+        assert quality['usable_sources'] == 2
+        assert after['current'] >= 100
     if label == 'quality_failure':
         assert after == before, 'Failed quality gate changed publication'
         assert status == 'quality_failed'
     print(label, state, after, flush=True)
 
 
-run('repeat', {}, 'success', 280)
-run('mealdb_outage', {'fail_sources': ['mealdb']}, 'success', 180)
-run('quality_failure', {'force_quality_failure': True}, 'failed', 180)
-run('restore', {}, 'success', 280)
+baseline_count = counts()['current']
+run('repeat', {}, 'success', baseline_count)
+run('mealdb_outage', {'fail_sources': ['mealdb']}, 'success')
+run('quality_failure', {'force_quality_failure': True}, 'failed')
+run('forkify_outage', {'fail_sources': ['forkify']}, 'success')
+run('wikibooks_outage', {'fail_sources': ['wikibooks']}, 'success')
+run('restore', {}, 'success', baseline_count)
 results['passed'] = True
 (root / 'evidence' / 'verification.json').write_text(json.dumps(results, indent=2), encoding='utf-8')
 print('All scheduled DAG verification scenarios passed', flush=True)

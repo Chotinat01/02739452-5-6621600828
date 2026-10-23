@@ -155,23 +155,33 @@ def extract_wikibooks(client, target=180, max_pages=320):
     return {'items': pages, 'warnings': errors, 'cached_pages': cached}
 
 
-def extract_spoonacular(client, limit=10):
-    api_key = os.getenv('SPOONACULAR_API_KEY', '').strip()
-    if not api_key:
-        raise RuntimeError('missing_api_key: set SPOONACULAR_API_KEY in .env')
-    headers = {'x-api-key': api_key}
-    limit = max(1, min(int(limit), 20))
-    search = client.get(f'https://api.spoonacular.com/recipes/complexSearch?number={limit}&offset=0', headers=headers)
-    ids = [str(r['id']) for r in search.json().get('results', [])]
-    if not ids:
-        raise RuntimeError('Spoonacular returned no recipes')
-    left = search.headers.get('X-API-Quota-Left')
-    # Reserve headroom rather than using the final points on a bulk request.
-    if left is not None and float(left) < len(ids) + 3:
-        raise RuntimeError('insufficient_quota: reserve remaining API points')
-    info = client.get('https://api.spoonacular.com/recipes/informationBulk?ids=' + ','.join(ids) + '&includeNutrition=false', headers=headers)
-    return {'items': info.json(), 'warnings': [], 'cached_pages': 0,
-            'quota_left': info.headers.get('X-API-Quota-Left')}
+def extract_forkify(client, limit=10):
+    # GET requires no key. Provider permits 100 requests/hour; one cold run uses <=11.
+    limit = max(1, min(int(limit), 10))
+    cache = client.cache_dir / f'forkify-pizza-{limit}.json' if client.cache_dir else None
+    if cache and cache.exists() and not client.refresh and time.time() - cache.stat().st_mtime < 3600:
+        payload = json.loads(cache.read_text(encoding='utf-8'))
+        payload['cached_pages'] = len(payload['items']) + 1
+        return payload
+    base = 'https://forkify-api.jonas.io/api/v2/recipes'
+    search = client.get(base + '?search=pizza').json()
+    summaries = search.get('data', {}).get('recipes', [])[:limit]
+    if not summaries:
+        raise RuntimeError('Forkify search returned no recipes')
+    items, warnings = [], []
+    for summary in summaries:
+        try:
+            recipe = client.get(base + '/' + str(summary['id'])).json()['data']['recipe']
+            # Do not retain publisher names, user keys, or unnecessary fields.
+            items.append({k: recipe.get(k) for k in ('id', 'title', 'cooking_time', 'ingredients')})
+        except (requests.RequestException, RuntimeError, ValueError, KeyError) as exc:
+            warnings.append({'source_id': str(summary.get('id', '')), 'reason': safe_error(exc)})
+    if not items:
+        raise RuntimeError('Forkify returned no usable recipe details')
+    payload = {'items': items, 'warnings': warnings, 'cached_pages': 0, 'fetched_at': now()}
+    if cache:
+        cache.write_text(json.dumps(payload, ensure_ascii=False), encoding='utf-8')
+    return payload
 
 
 def parse_wikibooks_page(page):
@@ -232,14 +242,18 @@ def transform(source, payload):
             records.append({'source': source, 'source_id': str(item['idMeal']), 'title': item.get('strMeal'),
                             'category': item.get('strCategory'), 'cuisine': item.get('strArea'), 'minutes': None,
                             'ingredients': ingredients, 'url': f"https://www.themealdb.com/meal/{item['idMeal']}", 'fetched_at': payload.get('fetched_at', now())})
-        elif source == 'spoonacular':
-            ingredients = [{'name': ingredient_key(i.get('name') or i.get('original')),
-                            'raw': clean(i.get('original') or i.get('name'))} for i in item.get('extendedIngredients', [])]
+        elif source == 'forkify':
+            ingredients = []
+            for ingredient in item.get('ingredients') or []:
+                description = clean(ingredient.get('description'))
+                quantity = ingredient.get('quantity')
+                amount = str(quantity) if quantity is not None else ''
+                ingredients.append({'name': ingredient_key(description),
+                                    'raw': clean(' '.join((amount, clean(ingredient.get('unit')), description)))})
             records.append({'source': source, 'source_id': str(item['id']), 'title': item.get('title'),
-                            'category': ', '.join(item.get('dishTypes') or []) or None,
-                            'cuisine': ', '.join(item.get('cuisines') or []) or None,
-                            'minutes': item.get('readyInMinutes') or None, 'ingredients': ingredients,
-                            'url': item.get('sourceUrl') if str(item.get('sourceUrl', '')).startswith('https://') else f"https://spoonacular.com/recipes/{item['id']}",
+                            'category': None, 'cuisine': None,
+                            'minutes': item.get('cooking_time') or None, 'ingredients': ingredients,
+                            'url': f"https://forkify-api.jonas.io/api/v2/recipes/{item['id']}",
                             'fetched_at': payload.get('fetched_at', now())})
     return records
 
@@ -258,6 +272,6 @@ def extract(source, client, settings):
         return extract_mealdb(client, int(settings.get('mealdb_limit', 100)))
     if source == 'wikibooks':
         return extract_wikibooks(client, int(settings.get('wiki_target', 180)), int(settings.get('wiki_max_pages', 320)))
-    if source == 'spoonacular':
-        return extract_spoonacular(client, int(settings.get('spoonacular_limit', 10)))
+    if source == 'forkify':
+        return extract_forkify(client, int(settings.get('forkify_limit', 10)))
     raise ValueError('Unknown source')

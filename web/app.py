@@ -32,7 +32,7 @@ if st.sidebar.button('Refresh from PostgreSQL', use_container_width=True):
     st.cache_data.clear()
     st.rerun()
 st.sidebar.divider()
-st.sidebar.caption('TheMealDB · Wikibooks Cookbook · Spoonacular')
+st.sidebar.caption('TheMealDB · Wikibooks Cookbook · Forkify')
 st.sidebar.caption('6621600828 | โชติณัช โสภาแปง')
 
 try:

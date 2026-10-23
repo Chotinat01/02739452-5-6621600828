@@ -1,9 +1,9 @@
 {
-  "checked_at": "20261023T065230",
+  "checked_at": "20261023T072456",
   "runs": [
     {
       "label": "repeat",
-      "run_id": "verify_repeat_20261023T065230",
+      "run_id": "verify_repeat_20261023T072456",
       "airflow_state": "success",
       "status": "published",
       "quality": {
@@ -15,8 +15,57 @@
           "rejected_fraction_at_most_20_percent": true
         },
         "passed": true,
-        "input_count": 280,
-        "unique_count": 280,
+        "input_count": 290,
+        "unique_count": 290,
+        "rejected_count": 0,
+        "usable_sources": 3,
+        "rejected_fraction": 0.0,
+        "all_three_sources_available": true
+      },
+      "sources": [
+        {
+          "source": "forkify",
+          "status": "ok",
+          "valid": 10
+        },
+        {
+          "source": "mealdb",
+          "status": "ok",
+          "valid": 100
+        },
+        {
+          "source": "wikibooks",
+          "status": "partial",
+          "valid": 180
+        }
+      ],
+      "before": {
+        "canonical": 290,
+        "current": 290,
+        "publication": "forkify_baseline"
+      },
+      "after": {
+        "canonical": 290,
+        "current": 290,
+        "publication": "verify_repeat_20261023T072456"
+      }
+    },
+    {
+      "label": "mealdb_outage",
+      "run_id": "verify_mealdb_outage_20261023T072456",
+      "airflow_state": "success",
+      "status": "published",
+      "quality": {
+        "checks": {
+          "fault_injection_disabled": true,
+          "all_source_tasks_recorded": true,
+          "at_least_one_usable_source": true,
+          "at_least_100_unique_recipes": true,
+          "rejected_fraction_at_most_20_percent": true
+        },
+        "passed": true,
+        "input_count": 190,
+        "unique_count": 190,
         "rejected_count": 0,
         "usable_sources": 2,
         "rejected_fraction": 0.0,
@@ -24,84 +73,35 @@
       },
       "sources": [
         {
-          "source": "mealdb",
+          "source": "forkify",
           "status": "ok",
-          "valid": 100
+          "valid": 10
         },
-        {
-          "source": "spoonacular",
-          "status": "unavailable",
-          "valid": 0
-        },
-        {
-          "source": "wikibooks",
-          "status": "partial",
-          "valid": 180
-        }
-      ],
-      "before": {
-        "canonical": 280,
-        "current": 280,
-        "publication": "live_baseline"
-      },
-      "after": {
-        "canonical": 280,
-        "current": 280,
-        "publication": "verify_repeat_20261023T065230"
-      }
-    },
-    {
-      "label": "mealdb_outage",
-      "run_id": "verify_mealdb_outage_20261023T065230",
-      "airflow_state": "success",
-      "status": "published",
-      "quality": {
-        "checks": {
-          "fault_injection_disabled": true,
-          "all_source_tasks_recorded": true,
-          "at_least_one_usable_source": true,
-          "at_least_100_unique_recipes": true,
-          "rejected_fraction_at_most_20_percent": true
-        },
-        "passed": true,
-        "input_count": 180,
-        "unique_count": 180,
-        "rejected_count": 0,
-        "usable_sources": 1,
-        "rejected_fraction": 0.0,
-        "all_three_sources_available": false
-      },
-      "sources": [
         {
           "source": "mealdb",
           "status": "unavailable",
           "valid": 0
         },
         {
-          "source": "spoonacular",
-          "status": "unavailable",
-          "valid": 0
-        },
-        {
           "source": "wikibooks",
           "status": "partial",
           "valid": 180
         }
       ],
       "before": {
-        "canonical": 280,
-        "current": 280,
-        "publication": "verify_repeat_20261023T065230"
+        "canonical": 290,
+        "current": 290,
+        "publication": "verify_repeat_20261023T072456"
       },
       "after": {
-        "canonical": 280,
-        "current": 180,
-        "publication": "verify_mealdb_outage_20261023T065230"
+        "canonical": 290,
+        "current": 190,
+        "publication": "verify_mealdb_outage_20261023T072456"
       }
     },
     {
       "label": "quality_failure",
-      "run_id": "verify_quality_failure_20261023T065230",
+      "run_id": "verify_quality_failure_20261023T072456",
       "airflow_state": "failed",
       "status": "quality_failed",
       "quality": {
@@ -113,23 +113,23 @@
           "rejected_fraction_at_most_20_percent": true
         },
         "passed": false,
-        "input_count": 280,
-        "unique_count": 280,
+        "input_count": 290,
+        "unique_count": 290,
         "rejected_count": 0,
-        "usable_sources": 2,
+        "usable_sources": 3,
         "rejected_fraction": 0.0,
-        "all_three_sources_available": false
+        "all_three_sources_available": true
       },
       "sources": [
+        {
+          "source": "forkify",
+          "status": "ok",
+          "valid": 10
+        },
         {
           "source": "mealdb",
           "status": "ok",
           "valid": 100
-        },
-        {
-          "source": "spoonacular",
-          "status": "unavailable",
-          "valid": 0
         },
         {
           "source": "wikibooks",
@@ -138,19 +138,19 @@
         }
       ],
       "before": {
-        "canonical": 280,
-        "current": 180,
-        "publication": "verify_mealdb_outage_20261023T065230"
+        "canonical": 290,
+        "current": 190,
+        "publication": "verify_mealdb_outage_20261023T072456"
       },
       "after": {
-        "canonical": 280,
-        "current": 180,
-        "publication": "verify_mealdb_outage_20261023T065230"
+        "canonical": 290,
+        "current": 190,
+        "publication": "verify_mealdb_outage_20261023T072456"
       }
     },
     {
-      "label": "restore",
-      "run_id": "verify_restore_20261023T065230",
+      "label": "forkify_outage",
+      "run_id": "verify_forkify_outage_20261023T072456",
       "airflow_state": "success",
       "status": "published",
       "quality": {
@@ -171,14 +171,14 @@
       },
       "sources": [
         {
+          "source": "forkify",
+          "status": "unavailable",
+          "valid": 0
+        },
+        {
           "source": "mealdb",
           "status": "ok",
           "valid": 100
-        },
-        {
-          "source": "spoonacular",
-          "status": "unavailable",
-          "valid": 0
         },
         {
           "source": "wikibooks",
@@ -187,14 +187,112 @@
         }
       ],
       "before": {
-        "canonical": 280,
-        "current": 180,
-        "publication": "verify_mealdb_outage_20261023T065230"
+        "canonical": 290,
+        "current": 190,
+        "publication": "verify_mealdb_outage_20261023T072456"
       },
       "after": {
-        "canonical": 280,
+        "canonical": 290,
         "current": 280,
-        "publication": "verify_restore_20261023T065230"
+        "publication": "verify_forkify_outage_20261023T072456"
+      }
+    },
+    {
+      "label": "wikibooks_outage",
+      "run_id": "verify_wikibooks_outage_20261023T072456",
+      "airflow_state": "success",
+      "status": "published",
+      "quality": {
+        "checks": {
+          "fault_injection_disabled": true,
+          "all_source_tasks_recorded": true,
+          "at_least_one_usable_source": true,
+          "at_least_100_unique_recipes": true,
+          "rejected_fraction_at_most_20_percent": true
+        },
+        "passed": true,
+        "input_count": 110,
+        "unique_count": 110,
+        "rejected_count": 0,
+        "usable_sources": 2,
+        "rejected_fraction": 0.0,
+        "all_three_sources_available": false
+      },
+      "sources": [
+        {
+          "source": "forkify",
+          "status": "ok",
+          "valid": 10
+        },
+        {
+          "source": "mealdb",
+          "status": "ok",
+          "valid": 100
+        },
+        {
+          "source": "wikibooks",
+          "status": "unavailable",
+          "valid": 0
+        }
+      ],
+      "before": {
+        "canonical": 290,
+        "current": 280,
+        "publication": "verify_forkify_outage_20261023T072456"
+      },
+      "after": {
+        "canonical": 290,
+        "current": 110,
+        "publication": "verify_wikibooks_outage_20261023T072456"
+      }
+    },
+    {
+      "label": "restore",
+      "run_id": "verify_restore_20261023T072456",
+      "airflow_state": "success",
+      "status": "published",
+      "quality": {
+        "checks": {
+          "fault_injection_disabled": true,
+          "all_source_tasks_recorded": true,
+          "at_least_one_usable_source": true,
+          "at_least_100_unique_recipes": true,
+          "rejected_fraction_at_most_20_percent": true
+        },
+        "passed": true,
+        "input_count": 290,
+        "unique_count": 290,
+        "rejected_count": 0,
+        "usable_sources": 3,
+        "rejected_fraction": 0.0,
+        "all_three_sources_available": true
+      },
+      "sources": [
+        {
+          "source": "forkify",
+          "status": "ok",
+          "valid": 10
+        },
+        {
+          "source": "mealdb",
+          "status": "ok",
+          "valid": 100
+        },
+        {
+          "source": "wikibooks",
+          "status": "partial",
+          "valid": 180
+        }
+      ],
+      "before": {
+        "canonical": 290,
+        "current": 110,
+        "publication": "verify_wikibooks_outage_20261023T072456"
+      },
+      "after": {
+        "canonical": 290,
+        "current": 290,
+        "publication": "verify_restore_20261023T072456"
       }
     }
   ],

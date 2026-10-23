@@ -10,7 +10,7 @@ root = Path(__file__).resolve().parents[1]
 (root / 'evidence').mkdir(exist_ok=True)
 client = HttpClient(root / 'data' / 'http_cache')
 results = {}
-for source in ('mealdb', 'wikibooks', 'spoonacular'):
+for source in ('mealdb', 'wikibooks', 'forkify'):
     try:
         payload = extract(source, client, {'wiki_target': 180})
         good, rejected = validate(transform(source, payload))

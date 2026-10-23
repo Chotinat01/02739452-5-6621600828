@@ -1,20 +1,29 @@
 {
+  "forkify": {
+    "run_id": "verify_restore_20261023T072456",
+    "status": "ok",
+    "valid": 10,
+    "unique": 10,
+    "rejected": 0,
+    "warnings": 0,
+    "checked_at": "2026-10-23 07:26:31.503821+00:00"
+  },
   "mealdb": {
+    "run_id": "verify_restore_20261023T072456",
+    "status": "ok",
     "valid": 100,
     "unique": 100,
     "rejected": 0,
     "warnings": 0,
-    "checked_at": "2026-10-23T06:46:07.661646+00:00"
+    "checked_at": "2026-10-23 07:26:34.699453+00:00"
   },
   "wikibooks": {
+    "run_id": "verify_restore_20261023T072456",
+    "status": "partial",
     "valid": 180,
     "unique": 180,
     "rejected": 0,
     "warnings": 8,
-    "checked_at": "2026-10-23T06:49:42.143249+00:00"
-  },
-  "spoonacular": {
-    "error": "missing_api_key: set SPOONACULAR_API_KEY in .env",
-    "checked_at": "2026-10-23T06:49:42.150765+00:00"
+    "checked_at": "2026-10-23 07:26:40.449549+00:00"
   }
 }

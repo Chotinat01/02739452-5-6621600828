@@ -15,10 +15,12 @@ def test_deduplicate_across_sources_but_keep_different_quantities():
     three = deepcopy(two)
     three['source_id'] = '3'
     three['ingredients'] = [{'name': 'apple', 'raw': '3 apples'}]
-    good, _ = validate([one, two, three, one])
+    same_from_third_source = deepcopy(one)
+    same_from_third_source.update(source='forkify', source_id='99')
+    good, _ = validate([one, two, three, same_from_third_source, one])
     merged = merge_records(good)
     assert len(merged) == 2
-    assert sorted(r['source_count'] for r in merged) == [1, 2]
+    assert sorted(r['source_count'] for r in merged) == [1, 3]
 
 
 def test_bad_fields_are_quarantined():
@@ -53,3 +55,32 @@ def test_mealdb_missing_time_and_blank_ingredients():
     result = transform('mealdb', {'items': [{'idMeal': 1, 'strMeal': 'Soup', 'strIngredient1': 'Salt', 'strMeasure1': '1 tsp'}]})
     assert result[0]['minutes'] is None
     assert result[0]['ingredients'] == [{'name': 'salt', 'raw': '1 tsp Salt'}]
+
+
+def test_forkify_null_quantities_and_provider_reported_minutes():
+    records = transform('forkify', {'fetched_at': '2026-10-23T00:00:00Z', 'items': [{
+        'id': 'sample', 'title': 'Pizza', 'cooking_time': 45,
+        'ingredients': [{'quantity': None, 'unit': '', 'description': 'Salt'},
+                        {'quantity': 0.5, 'unit': 'cup', 'description': 'onion'}]}]})
+    good, rejected = validate(records)
+    assert not rejected and good[0]['minutes'] == 45
+    assert good[0]['ingredients'][0]['raw'] == 'Salt'
+    assert good[0]['ingredients'][1]['raw'] == '0.5 cup onion'
+    assert good[0]['category'] is None
+
+
+def test_forkify_cache_preserves_retrieval_time_and_avoids_http(tmp_path):
+    import json
+    from pipeline.sources import extract_forkify
+    payload = {'items': [{'id': 'sample'}], 'warnings': [], 'fetched_at': '2026-10-20T00:00:00Z'}
+    (tmp_path / 'forkify-pizza-10.json').write_text(json.dumps(payload), encoding='utf-8')
+
+    class CachedClient:
+        cache_dir = tmp_path
+        refresh = False
+        def get(self, url):
+            raise AssertionError('Warm cache must not call HTTP')
+
+    result = extract_forkify(CachedClient())
+    assert result['fetched_at'] == payload['fetched_at']
+    assert result['cached_pages'] == 2

@@ -10,7 +10,7 @@ from pipeline.sources import HttpClient, extract, safe_error, transform
 
 def settings_for(context):
     conf = dict(context['dag_run'].conf or {})
-    allowed = {'fail_sources', 'force_quality_failure', 'refresh', 'wiki_target', 'wiki_max_pages', 'mealdb_limit', 'spoonacular_limit'}
+    allowed = {'fail_sources', 'force_quality_failure', 'refresh', 'wiki_target', 'wiki_max_pages', 'mealdb_limit', 'forkify_limit'}
     return {k: v for k, v in conf.items() if k in allowed}
 
 
@@ -39,7 +39,7 @@ def extract_task(source, **context):
     except Exception as exc:
         # Expected source failures become data/status; other sources continue.
         payload = {'items': [], 'status': 'unavailable', 'error': safe_error(exc), 'warnings': []}
-    payload['fetched_at'] = now()
+    payload.setdefault('fetched_at', now())
     return write(path_for(context['run_id'], source, 'raw'), payload)
 
 

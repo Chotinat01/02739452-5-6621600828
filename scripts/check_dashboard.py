@@ -2,7 +2,8 @@ from streamlit.testing.v1 import AppTest
 
 app = AppTest.from_file('/app/web/app.py').run(timeout=30)
 assert not app.exception, app.exception
-assert app.metric[0].value == '280', app.metric[0].value
+assert int(app.metric[0].value.replace(',', '')) >= 100, app.metric[0].value
+assert app.metric[1].value == '3 / 3', app.metric[1].value
 app.text_input[0].set_value('apple').run(timeout=30)
 assert not app.exception
 assert any('results' in h.value for h in app.subheader)

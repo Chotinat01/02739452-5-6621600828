@@ -4,7 +4,7 @@ import unicodedata
 from collections import defaultdict
 from datetime import datetime, timezone
 
-SOURCES = ('mealdb', 'wikibooks', 'spoonacular')
+SOURCES = ('mealdb', 'wikibooks', 'forkify')
 
 
 def now():

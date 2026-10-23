@@ -8,9 +8,9 @@ Repository: https://github.com/Chotinat01/02739452-5-6621600828
 
 ## สถานะที่ตรวจได้จริง
 
-ดึงข้อมูลจริงได้ 280 สูตรหลังรวมด้วยกฎตัดซ้ำแบบระมัดระวัง จาก TheMealDB 100 สูตร และ Wikibooks 180 สูตร ผ่าน Airflow → PostgreSQL → dashboard แล้ว รายละเอียดการทดสอบอยู่ใน `evidence/` และ `docs/TESTING.md`
+ดึงข้อมูลจริงได้ 290 สูตรหลังรวมด้วยกฎตัดซ้ำแบบระมัดระวัง จาก TheMealDB 100 สูตร, Wikibooks 180 สูตร และ Forkify 10 สูตร ผ่าน Airflow → PostgreSQL → dashboard แล้ว รายละเอียดการทดสอบอยู่ใน `evidence/` และ `docs/TESTING.md`
 
-**ทำได้ระดับ 2 และมีหน้าสถานะ pipeline สำหรับโบนัส** มีโค้ดรองรับระดับ 3 ได้แก่แหล่งที่สาม การทนแหล่งล่ม การตัดซ้ำข้ามแหล่ง และ quality branching แต่ **ยังยืนยันระดับ 3 ครบไม่ได้ เพราะยังไม่มี Spoonacular API key และยังไม่ได้ดึงจริงครบสามแหล่ง** อย่าอ้างว่าได้คะแนนเต็มหรือรับรองคะแนนจากไฟล์นี้
+**ดึงข้อมูลจริงครบสามแหล่งแล้วโดยไม่ต้องใช้ API key** มี TaskGroup ขนาน, UPSERT, การทนแหล่งล่ม, การตัดซ้ำข้ามแหล่ง, quality branching และหน้าสถานะ pipeline สำหรับโบนัส ผลทดสอบระดับ 3 ต้องดูหลักฐานรอบล่าสุดใน `evidence/verification.json` ไม่ถือว่ามีการรับรองคะแนนจากอาจารย์
 
 ## แหล่งข้อมูลและการใช้งาน
 
@@ -18,7 +18,7 @@ Repository: https://github.com/Chotinat01/02739452-5-6621600828
 |---|---|---|---|
 | [TheMealDB](https://www.themealdb.com/api.php) | REST API `search.php?s=` และค้นอักษรต้นตามเอกสาร | ชื่อ ประเภท ประเทศ วัตถุดิบ | ใช้ educational key `1` ที่ผู้ให้บริการเผยแพร่ จำกัดเก็บไม่เกิน 100 สูตร |
 | [Wikibooks Cookbook](https://en.wikibooks.org/wiki/Category:Recipes) | requests + BeautifulSoup จาก HTML | ชื่อ ส่วนผสม หมวด และ URL ต้นฉบับ | ตรวจ robots.txt ก่อนเสมอ หน่วงอย่างน้อย 1.1 วินาทีต่อ host เก็บ HTML cache 24 ชั่วโมง |
-| [Spoonacular](https://spoonacular.com/food-api/docs) | `complexSearch` + `informationBulk` | ชื่อ วัตถุดิบ ประเภท ประเทศ เวลาปรุงเมื่อมีข้อมูล | ต้องใช้ key ของผู้ใช้ จำกัด 10 สูตร ตรวจ quota header และแสดง unavailable เมื่อไม่มี key |
+| [Forkify](https://forkify-api.jonas.io/) | GET `/api/v2/recipes?search=pizza` แล้วอ่านรายละเอียดตาม id | ชื่อ วัตถุดิบ เวลาปรุงที่ API รายงาน | GET ไม่ต้องใช้ key จำกัด 10 สูตร เก็บ cache 1 ชั่วโมง ใช้ 11 คำขอต่อรอบที่ไม่มี cache; ผู้ให้บริการจำกัด 100 คำขอ/ชั่วโมง |
 
 ไม่มี Selenium ไม่มีข้อมูลผู้ใช้หรือผู้รีวิว ไม่เก็บข้อมูลส่วนบุคคลจากต้นทาง หน้า Wikibooks ที่ไม่มี Ingredients จะถูกบันทึกว่าข้าม ไม่สมมติวัตถุดิบขึ้นเอง ต้นทางบางรายการไม่มีประเทศหรือเวลาปรุง เก็บเป็น NULL
 
@@ -57,7 +57,9 @@ docker compose exec airflow-scheduler airflow dags trigger international_recipe_
 
 การรันครั้งแรกอาจใช้เวลาหลายนาทีเพราะ Wikibooks มีการหน่วงคำขอและตรวจ robots หน้า dashboard จะรอจน quality gate ผ่านและเผยแพร่สำเร็จ กด **Refresh from PostgreSQL** เพื่อดึงผลล่าสุด
 
-ถ้ามี Spoonacular key ให้ใส่เฉพาะใน `.env` แล้วรัน `docker compose up -d --force-recreate airflow-scheduler airflow-webserver` และ Trigger DAG ใหม่ ห้ามส่ง key ในแชต ห้ามใส่ใน git หรือภาพหน้าจอ
+ทั้งสามแหล่งใช้ได้โดยไม่ต้องสมัคร API key เพิ่ม ถ้าแก้จากเวอร์ชันเดิมที่ใช้ Spoonacular ให้อัปเดตโค้ดและ `docker compose up -d --build` แล้ว Trigger DAG ใหม่ ชื่อกลุ่มที่สามจะเป็น `forkify` ประวัติรอบเดิมยังคงอยู่ในฐานข้อมูล
+
+Forkify เป็น API สำหรับโครงการเรียน ไม่ใช่ผู้จัดทำสูตรต้นฉบับทั้งหมด จึงเก็บ endpoint URL ที่ดึงจริงเป็นที่มา และตัดชื่อ publisher กับข้อมูลผู้ใช้ออกจาก payload เวลาปรุงเป็นค่าที่ API รายงาน ไม่ได้ยืนยันจากการปรุงจริง หากเคยจองโดยระบุ Spoonacular ให้ผู้ใช้แก้แหล่งที่สามตามข้อความใน `docs/TOPIC_RESERVATION.md`
 
 ## โครงสร้าง DAG
 
@@ -65,7 +67,7 @@ docker compose exec airflow-scheduler airflow dags trigger international_recipe_
 flowchart LR
   B[begin] --> ME[mealdb extract]
   B --> WE[wikibooks extract]
-  B --> SE[spoonacular extract]
+  B --> SE[forkify extract]
   ME --> MT[transform] --> ML[load staging]
   WE --> WT[transform] --> WL[load staging]
   SE --> ST[transform] --> SL[load staging]
@@ -77,7 +79,7 @@ flowchart LR
   Q -->|fail| F[quarantine and fail DAG]
 ```
 
-สาม TaskGroup ไม่มี dependency ข้ามกัน จึงทำงานขนานด้วย LocalExecutor แต่ละแหล่งแยก extract → transform → load ข้อมูล HTML ขนาดใหญ่อยู่ใน volume ส่วน XCom เก็บเพียง path/summary แหล่งที่ไม่มี key หรือ network ล่มจะมีสถานะ `unavailable` ทำให้ merge ใช้แหล่งที่เหลือได้ task สีเขียวจึงไม่ได้หมายความว่าแหล่งนั้นดึงสำเร็จ ต้องตรวจหน้าสถานะควบคู่
+สาม TaskGroup ไม่มี dependency ข้ามกัน จึงทำงานขนานด้วย LocalExecutor แต่ละแหล่งแยก extract → transform → load ข้อมูล HTML ขนาดใหญ่อยู่ใน volume ส่วน XCom เก็บเพียง path/summary แหล่งที่ network ล่มจะมีสถานะ `unavailable` ทำให้ merge ใช้แหล่งที่เหลือได้ task สีเขียวจึงไม่ได้หมายความว่าแหล่งนั้นดึงสำเร็จ ต้องตรวจหน้าสถานะควบคู่
 
 ## Schema และกฎข้อมูล
 
@@ -118,7 +120,7 @@ docker compose logs --tail 100 airflow-init
 {"force_quality_failure": true}
 ```
 
-สั่ง `{"refresh": true}` เพื่อทิ้ง cache แล้วเก็บสดอีกครั้ง เฉพาะเมื่อจำเป็น ลดการรบกวนต้นทาง อ่านขั้นตอนและผลจริงใน `docs/TESTING.md`
+สั่ง `{"refresh": true}` เพื่อข้าม cache แล้วเก็บสดอีกครั้ง เฉพาะเมื่อจำเป็น ลดการรบกวนต้นทาง Forkify จำกัด 100 คำขอต่อชั่วโมง จึงไม่ควรสั่ง refresh ซ้ำถี่ ๆ โดยเฉพาะเมื่อมี retry อ่านขั้นตอนและผลจริงใน `docs/TESTING.md`
 
 หาก Docker ติดต่อไม่ได้ ให้เปิด Docker Desktop และตรวจ `docker info` หากพอร์ตชน ให้แก้ `AIRFLOW_PORT` หรือ `DASHBOARD_PORT` ใน `.env` แล้วรัน Compose ใหม่ หากขึ้นหน้าเว็บแต่ยังไม่มีข้อมูล ให้ดูสถานะ run และสาเหตุใน Pipeline status
 
@@ -129,7 +131,7 @@ docker compose logs --tail 100 airflow-init
 - PDF ใช้ `5_6621600828_summary.pdf` ตามลำดับที่ใน repo หากอาจารย์กำหนดสองหลักให้เปลี่ยนเป็น `05_6621600828_summary.pdf`
 - PDF ระบุเฉพาะระดับที่ทดสอบได้จริง มี Graph/Grid/dashboard จากระบบจริง และปัญหาที่พบจริง
 - ก่อน commit ตรวจ `.env` ไม่อยู่ในรายการ staged และห้าม commit `data/` หรือ logs ที่อาจมีข้อมูล credential
-- ถ้าต้องการระดับ 3 เต็ม ต้องมี key ดึง Spoonacular ได้จริง แล้วรันทดสอบ/ถ่ายภาพและสร้าง PDF ใหม่ให้ตรงผล
+- แก้แหล่งที่สามในโพสต์จองจาก Spoonacular เป็น Forkify ตาม `docs/TOPIC_RESERVATION.md` เพื่อให้ตรงกับระบบที่ส่ง
 
 ## โครงไฟล์
 
@@ -137,4 +139,4 @@ docker compose logs --tail 100 airflow-init
 
 สร้าง PDF ใหม่ได้ด้วย Python ที่ติดตั้ง `requirements-report.txt` แล้วรัน `python scripts/make_summary.py` บน Windows ที่มีฟอนต์ Tahoma สคริปต์ใช้ภาพใน evidence และต้องมี verification.json ที่ผ่านแล้ว การเปลี่ยนภาพหรือเพิ่มแหล่งข้อมูลต้องตรวจรายงานให้ตรงกับผลใหม่ก่อนส่ง
 
-เอกสารอ้างอิง: [Airflow Docker](https://airflow.apache.org/docs/apache-airflow/2.10.4/howto/docker-compose/index.html), [TheMealDB API](https://www.themealdb.com/api.php), [Spoonacular API](https://spoonacular.com/food-api/docs), [Wikibooks robots](https://en.wikibooks.org/robots.txt)
+เอกสารอ้างอิง: [Airflow Docker](https://airflow.apache.org/docs/apache-airflow/2.10.4/howto/docker-compose/index.html), [TheMealDB API](https://www.themealdb.com/api.php), [Forkify API](https://forkify-api.jonas.io/), [Wikibooks robots](https://en.wikibooks.org/robots.txt)
