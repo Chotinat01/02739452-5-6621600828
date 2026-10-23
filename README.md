@@ -46,6 +46,8 @@ docker compose ps -a
 - Dashboard: http://localhost:8501
 - PostgreSQL อยู่เฉพาะเครือข่าย Docker ไม่เปิด port ให้ภายนอก
 
+Dashboard ตั้งธีมสว่างใน `.streamlit/config.toml` และให้สีพื้นกับข้อความของ widget ใช้ธีมเดียวกัน กราฟใช้พื้นขาวและตัวอักษรเข้มโดยตรง หากอัปเดตจากรุ่นเดิมให้รัน `docker compose up -d --build --no-deps dashboard` แล้วรีเฟรชเบราว์เซอร์
+
 เปิด DAG `international_recipe_pipeline` แล้ว Unpause และ Trigger DAG หรือใช้คำสั่ง:
 
 ```powershell

@@ -8,11 +8,10 @@ import streamlit as st
 
 st.set_page_config(page_title='Recipe Atlas', page_icon='🍲', layout='wide')
 st.markdown('''<style>
-.stApp {background: #f7f5ef; color:#172d2b;}
 .block-container {padding-top:2.4rem; max-width:1450px;}
-h1,h2,h3 {color:#173f38;}
-[data-testid="stMetric"] {background:white; border:1px solid #e6e2d7; border-radius:12px; padding:18px;}
-[data-testid="stSidebar"] {background:#eeeae0;}
+[data-testid="stMetric"] {background:var(--secondary-background-color); border:1px solid #81988e; border-radius:12px; padding:18px;}
+[data-testid="stMetricValue"] {font-weight:700;}
+[data-testid="stCaptionContainer"] {opacity:1;}
 </style>''', unsafe_allow_html=True)
 
 
@@ -109,15 +108,20 @@ with left:
     if counts:
         chart = pd.DataFrame(counts.most_common(12), columns=['Ingredient', 'Recipes']).sort_values('Recipes')
         fig = px.bar(chart, x='Recipes', y='Ingredient', orientation='h', color_discrete_sequence=['#276753'])
-        fig.update_layout(height=370, margin=dict(l=0, r=15, t=5, b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(template='plotly_white', height=370, margin=dict(l=0, r=15, t=5, b=0),
+                          paper_bgcolor='#ffffff', plot_bgcolor='#ffffff', font=dict(color='#172d2b', size=14),
+                          xaxis=dict(gridcolor='#d9e3dd', tickfont=dict(color='#172d2b')),
+                          yaxis=dict(tickfont=dict(color='#172d2b')))
+        st.plotly_chart(fig, use_container_width=True, theme=None)
 with right:
     st.subheader('Recipes by source')
     counts = Counter(s['source'] for r in filtered for s in {s['source']: s for s in r['sources']}.values())
     if counts:
-        fig = px.pie(names=list(counts), values=list(counts.values()), hole=.68, color_discrete_sequence=['#276753', '#db9e45', '#7a99a0'])
-        fig.update_layout(height=370, margin=dict(l=5, r=5, t=5, b=5), paper_bgcolor='rgba(0,0,0,0)', legend=dict(orientation='h'))
-        st.plotly_chart(fig, use_container_width=True)
+        fig = px.pie(names=list(counts), values=list(counts.values()), hole=.68, color_discrete_sequence=['#17634f', '#a86010', '#435f84'])
+        fig.update_traces(textfont=dict(color='#ffffff', size=15), marker=dict(line=dict(color='#ffffff', width=2)))
+        fig.update_layout(template='plotly_white', height=370, margin=dict(l=5, r=5, t=5, b=5),
+                          paper_bgcolor='#ffffff', font=dict(color='#172d2b', size=14), legend=dict(orientation='h'))
+        st.plotly_chart(fig, use_container_width=True, theme=None)
     st.caption('A recipe present in several sources is counted once per source.')
 st.subheader(f'Recipe collection · {len(filtered):,} results')
 table = pd.DataFrame([{'Recipe': r['title'], 'Category': r['category'], 'Cuisine': r['cuisine'], 'Minutes': float(r['minutes']) if r['minutes'] else None,
